@@ -29,7 +29,7 @@ class SDLException : Exception {
  *  Throws:
  *      SDLException resultが0の場合に投げられる。
  */
-void enforceSDL(R)(R result) {
+R enforceSDL(R)(R result) {
     // 戻り値の型に応じてエラー判定を行う。
     static if(is(R : void*)) {
         if(result is null) {
@@ -40,6 +40,7 @@ void enforceSDL(R)(R result) {
             throwSdlException();
         }
     }
+    return result;
 }
 
 /**
