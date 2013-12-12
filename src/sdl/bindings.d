@@ -6,6 +6,16 @@ module sdl.bindings;
 
 extern(C):
 
+struct SDL_Point {
+    int x;
+    int y;
+}
+
+struct SDL_Rect {
+    int x, y;
+    int w, h;
+}
+
 enum SDL_INIT_TIMER = 0x00000001;
 enum SDL_INIT_AUDIO = 0x00000010;
 enum SDL_INIT_VIDEO = 0x00000020;
@@ -37,6 +47,8 @@ enum {
     SDL_RENDERER_TARGETTEXTURE = 0x00000008
 }
 
+enum SDL_ALPHA_OPAQUE = 255;
+
 struct SDL_Renderer;
 
 SDL_Renderer* SDL_CreateRenderer(SDL_Window* window, int index, Uint32 flags);
@@ -45,6 +57,8 @@ void SDL_RenderPresent(SDL_Renderer* renderer);
 void SDL_DestroyRenderer(SDL_Renderer* renderer);
 int SDL_SetRenderDrawColor(SDL_Renderer* renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 int SDL_RenderClear(SDL_Renderer* renderer);
+int SDL_RenderDrawPoint(SDL_Renderer* renderer, int x, int y);
+int SDL_RenderDrawPoints(SDL_Renderer* renderer, const(SDL_Point)* points, int count);
 
 enum {
     SDL_WINDOW_FULLSCREEN = 0x00000001,

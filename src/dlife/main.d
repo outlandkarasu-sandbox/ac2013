@@ -40,6 +40,15 @@ void main(string[] args) {
     // スコープ終了時にウィンドウを破棄
     scope(exit) SDL_DestroyWindow(window);
 
+    // レンダラー生成
+    auto renderer = enforceSDL(SDL_CreateRenderer(
+                window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+    scope(exit) SDL_DestroyRenderer(renderer);
+
+    // 画面クリア
+    enforceSDL(SDL_SetRenderDrawColor(renderer, Uint8.max, Uint8.max, Uint8.max, Uint8.max));
+    SDL_RenderClear(renderer);
+
     // 時間計測
     auto watch = FpsWatch(FPS);
 
@@ -54,6 +63,17 @@ void main(string[] args) {
                 quit = true;
             }
         }
+
+        // 画面クリア
+        enforceSDL(SDL_SetRenderDrawColor(renderer, Uint8.max, Uint8.max, Uint8.max, Uint8.max));
+        SDL_RenderClear(renderer);
+
+        // 描画処理
+        enforceSDL(SDL_SetRenderDrawColor(renderer, 0, 0, 0, Uint8.max));
+        enforceSDL(SDL_RenderDrawPoint(renderer, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
+
+        // 描画結果表示
+        SDL_RenderPresent(renderer);
 
         // 次のフレーム開始時刻まで待つ
         watch.waitNextFrame();
