@@ -55,12 +55,9 @@ void main(string[] args) {
             }
         }
 
-        // フレーム終了時刻
-        immutable endTicks = SDL_GetTicks();
-
         // 次のフレーム開始時刻まで待つ
-        immutable rest = endTicks - startTicks;
-        SDL_Delay(rest > 0 ? rest : 0);
+        immutable elapse = SDL_GetTicks() - startTicks;
+        SDL_Delay(elapse < MILLS_PER_FRAME ? MILLS_PER_FRAME - elapse : 0);
     }
 }
 
