@@ -84,7 +84,8 @@ auto SDL_WINDOWPOS_ISCENTERED(X)(X x) pure nothrow @safe {
 struct SDL_Window;
 SDL_Window* SDL_CreateWindow(const(char)* title, int x, int y, int w, int h, Uint32 flags);
 void SDL_DestroyWindow(SDL_Window* window);
- 
+void SDL_SetWindowTitle(SDL_Window* window, const(char)* title);
+
 enum SDL_Scancode {
     SDL_SCANCODE_UNKNOWN = 0,
     SDL_SCANCODE_A = 4,
