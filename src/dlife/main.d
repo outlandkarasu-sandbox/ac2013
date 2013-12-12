@@ -17,8 +17,8 @@ enum WINDOW_HEIGHT = 480;
 /// 秒間フレーム数(希望)
 enum FPS = 60;
 
-/// 1フレーム当たりミリ秒数
-enum MILLS_PER_FRAME = 1000 / FPS;
+/// 1フレーム当たりミリ秒数(小数切り上げ)
+enum MILLS_PER_FRAME = (1000 + FPS - 1) / FPS;
 
 /**
  *  メイン関数
@@ -43,6 +43,10 @@ void main(string[] args) {
     // スコープ終了時にウィンドウを破棄
     scope(exit) SDL_DestroyWindow(window);
 
+    // FPS計測用
+    size_t totalElapse = 0;
+    size_t frameCount = 0;
+
     // メインループ
     for(bool quit = false; !quit;) {
         // フレーム開始時刻
@@ -57,7 +61,20 @@ void main(string[] args) {
 
         // 次のフレーム開始時刻まで待つ
         immutable elapse = SDL_GetTicks() - startTicks;
-        SDL_Delay(elapse < MILLS_PER_FRAME ? MILLS_PER_FRAME - elapse : 0);
+        SDL_Delay((elapse < MILLS_PER_FRAME) ? MILLS_PER_FRAME - elapse : 0);
+
+        // FPS計測用に描画時間を集計
+        totalElapse += (elapse < MILLS_PER_FRAME) ? MILLS_PER_FRAME : elapse;
+        ++frameCount;
+
+        // 1秒分描画したら、FPSを表示する
+        if(frameCount >= FPS) {
+            SDL_SetWindowTitle(window, toStringz(format("FPS:%f", FPS * 1000.0 / totalElapse)));
+
+            // カウンタ初期化
+            frameCount = 0;
+            totalElapse = 0;
+        }
     }
 }
 
