@@ -61,7 +61,11 @@ class World {
     this(size_t width, size_t height) @safe {
         width_ = width;
         height_ = height;
-        world_ = createWorld();
+
+        // 世界を2面生成し、時刻経過のたびに入れ替える
+        world1_ = createWorld();
+        world2_ = createWorld();
+        world_ = world1_;
     }
 
     /**
@@ -98,7 +102,7 @@ class World {
      *  世界を次の時刻に進める
      */
     void next() @safe {
-        auto nextWorld = createWorld();
+        auto nextWorld = (world_ is world1_) ? world2_ : world1_;
 
         // 全セルの生存チェック。結果を新しい世界に設定
         foreach(y, row; world_) {
@@ -202,6 +206,12 @@ private:
 
     /// 世界全体の情報
     bool[][] world_;
+
+    /// 世界面その1
+    bool[][] world1_;
+
+    /// 世界面その2
+    bool[][] world2_;
 
     // ブリンカーの複数フレームテスト
     unittest {
