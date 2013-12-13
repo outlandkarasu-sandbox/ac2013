@@ -34,6 +34,23 @@ class World {
         // 縦方向の2セルは死亡
         assert(!world.isAlive(4, 4));
         assert(!world.isAlive(4, 6));
+
+        // ライフの巡回
+        struct Life {
+            size_t x;
+            size_t y;
+        }
+
+        Life[] lives;
+        foreach(x, y; world) {
+            lives ~= Life(x, y);
+        }
+
+        // 横方向にライフを集約していることを確認
+        assert(lives.length == 3);
+        assert(lives[0] == Life(3, 5));
+        assert(lives[1] == Life(4, 5));
+        assert(lives[2] == Life(5, 5));
     }
 
     /**
@@ -92,6 +109,21 @@ class World {
 
         // 新しい世界に移行
         world_ = nextWorld;
+    }
+
+    /// 生存している全ライフを巡回する
+    int opApply(int delegate(size_t x, size_t y) dg) {
+        foreach(y, row; world_) {
+            foreach(x, life; row) {
+                if(life) {
+                    if(immutable result = dg(x, y)) {
+                        return result;
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 
 private:
@@ -170,5 +202,49 @@ private:
 
     /// 世界全体の情報
     bool[][] world_;
+
+    // ブリンカーの複数フレームテスト
+    unittest {
+        auto world = new World(10, 10);
+        world.addLife(4, 4);
+        world.addLife(4, 5);
+        world.addLife(4, 6);
+
+        world.next();
+
+        assert(world.isAlive(3, 5));
+        assert(world.isAlive(4, 5));
+        assert(world.isAlive(5, 5));
+
+        world.next();
+
+        assert(world.isAlive(4, 4));
+        assert(world.isAlive(4, 5));
+        assert(world.isAlive(4, 5));
+
+        world.next();
+
+        assert(world.isAlive(3, 5));
+        assert(world.isAlive(4, 5));
+        assert(world.isAlive(5, 5));
+    }
+
+    // opApplyのbreakの確認
+    unittest {
+        auto world = new World(10, 10);
+        world.addLife(4, 4);
+        world.addLife(4, 5);
+        world.addLife(4, 6);
+
+        size_t lastY = 0;
+        foreach(x, y; world) {
+            lastY = y;
+            if(y == 5) {
+                break;
+            }
+        }
+
+        assert(lastY == 5);
+    }
 }
 
