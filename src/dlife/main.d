@@ -3,7 +3,7 @@
  */
 module dlife.main;
 
-import sdl;
+import sdl.all;
 
 import std.random;
 import std.stdio;
