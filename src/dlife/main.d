@@ -12,17 +12,23 @@ import std.string;
 import dlife.life;
 
 /// ウィンドウの幅
-enum WINDOW_WIDTH = 640;
+enum WINDOW_WIDTH = 320;
 
 /// ウィンドウの高さ
-enum WINDOW_HEIGHT = 480;
+enum WINDOW_HEIGHT = 240;
 
 /// 秒間フレーム数(希望)
 enum FPS = 60;
 
+/// FPS再計算時間
+enum FPS_REFRESH_MILLS = 500;
+
 /// 初期配置時のライフの割合の分母
 /// 2を指定した場合、2セルに1つの割合でランダムにライフを生成する
 enum LIFE_DENOMINATOR = 2;
+
+/// 点描画用バッファサイズ
+enum POINT_BUFFER_SIZE = 100000;
 
 /**
  *  メイン関数
@@ -56,20 +62,14 @@ void main(string[] args) {
     enforceSDL(SDL_SetRenderDrawColor(renderer, Uint8.max, Uint8.max, Uint8.max, Uint8.max));
     SDL_RenderClear(renderer);
 
-    // 時間計測
+    // 点バッファ生成
+    auto buffer = PointBuffer(renderer, POINT_BUFFER_SIZE);
+
+    // 世界生成
+    auto world = createWorld(WINDOW_WIDTH, WINDOW_HEIGHT, LIFE_DENOMINATOR);
+
+    // 時間計測開始
     auto watch = FpsWatch(FPS);
-
-    // ライフゲームワールドの生成
-    auto world = new World(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-    // ランダムにライフを配置
-    foreach(y; 0 .. WINDOW_HEIGHT) {
-        foreach(x; 0 .. WINDOW_WIDTH) {
-            if(uniform(0, LIFE_DENOMINATOR) == 0) {
-                world.addLife(x, y);
-            }
-        }
-    }
 
     // メインループ
     for(bool quit = false; !quit;) {
@@ -95,8 +95,11 @@ void main(string[] args) {
 
         // 全ライフの描画
         foreach(x, y; world) {
-            enforceSDL(SDL_RenderDrawPoint(renderer, cast(int) x, cast(int) y));
+            buffer.add(x, y);
         }
+
+        // 残りのバッファのフラッシュ
+        buffer.flush();
 
         // 描画結果表示
         SDL_RenderPresent(renderer);
@@ -104,14 +107,37 @@ void main(string[] args) {
         // 次のフレーム開始時刻まで待つ
         watch.waitNextFrame();
 
-        // 1秒分描画したら、FPSを表示する
-        if(watch.totalFrames >= FPS) {
+        // 指定ミリ秒分描画したら、FPSを表示する
+        if(watch.totalElapse >= FPS_REFRESH_MILLS) {
             SDL_SetWindowTitle(window, toStringz(format("FPS:%f", watch.actualFps)));
 
             // FPS計測のリセット
             watch.resetFps();
         }
     }
+}
+
+/**
+ *  世界の生成
+ *
+ *  Params:
+ *      width = 世界の幅
+ *      height = 世界の高さ
+ *      denom = セルに対するライフの割合の分母。
+ *              例えば、2セルにつき1ライフの割合で配置したい場合は
+ *              2を指定する。
+ */
+World createWorld(size_t width, size_t height, int denom) {
+    // ランダムにライフを配置
+    auto world = new World(width, height);
+    foreach(y; 0 .. height) {
+        foreach(x; 0 .. width) {
+            if(uniform(0, denom) == 0) {
+                world.addLife(x, y);
+            }
+        }
+    }
+    return world;
 }
 
 /**
@@ -134,5 +160,54 @@ bool processEvent(const ref SDL_Event e) {
         default:
             return true;
     }
+}
+
+/// 点描画用バッファ
+struct PointBuffer {
+
+    /**
+     *  Params:
+     *      renderer = 描画対象レンダラ
+     *      size = バッファサイズ
+     */
+    this(SDL_Renderer* renderer, size_t size) @safe {
+        renderer_ = renderer;
+        buffer_.length = size;
+    }
+
+    /**
+     *  点の追加
+     *
+     *  Params:
+     *      x = 追加する点のX座標
+     *      y = 追加する点のY座標
+     */
+    void add(size_t x, size_t y) {
+        // 既にバッファがいっぱいだった場合はフラッシュ
+        if(buffer_.length == end_) {
+            flush();
+        }
+
+        // バッファに追加
+        buffer_[end_] = SDL_Point(cast(int) x, cast(int) y);
+        ++end_;
+    }
+
+    /// バッファ内容を全て書き出す
+    void flush() {
+        enforceSDL(SDL_RenderDrawPoints(renderer_, buffer_.ptr, cast(int) end_));
+        end_ = 0;
+    }
+
+private:
+
+    /// バッファ
+    SDL_Point[] buffer_;
+
+    /// バッファ使用済み終端
+    size_t end_ = 0;
+
+    /// 描画先レンダラ
+    SDL_Renderer* renderer_;
 }
 
