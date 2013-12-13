@@ -246,5 +246,28 @@ private:
 
         assert(lastY == 5);
     }
+
+    // 端のテスト
+    unittest {
+        // 左上端にブリンカー配置
+        auto world = new World(10, 10);
+        world.addLife(0, world.bottom);
+        world.addLife(0, 0);
+        world.addLife(0, 1);
+
+        world.next();
+
+        // 右端に突き出す形で生存
+        assert(world.isAlive(world.right, 0));
+        assert(world.isAlive(0, 0));
+        assert(world.isAlive(1, 0));
+
+        world.next();
+
+        // 上に突き抜けて生存
+        world.addLife(0, world.bottom);
+        world.addLife(0, 0);
+        world.addLife(0, 1);
+    }
 }
 

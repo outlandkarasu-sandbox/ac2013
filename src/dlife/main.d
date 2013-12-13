@@ -5,8 +5,11 @@ module dlife.main;
 
 import sdl;
 
+import std.random;
 import std.stdio;
 import std.string;
+
+import dlife.life;
 
 /// ウィンドウの幅
 enum WINDOW_WIDTH = 640;
@@ -16,6 +19,10 @@ enum WINDOW_HEIGHT = 480;
 
 /// 秒間フレーム数(希望)
 enum FPS = 60;
+
+/// 初期配置時のライフの割合の分母
+/// 2を指定した場合、2セルに1つの割合でランダムにライフを生成する
+enum LIFE_DENOMINATOR = 2;
 
 /**
  *  メイン関数
@@ -52,6 +59,18 @@ void main(string[] args) {
     // 時間計測
     auto watch = FpsWatch(FPS);
 
+    // ライフゲームワールドの生成
+    auto world = new World(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    // ランダムにライフを配置
+    foreach(y; 0 .. WINDOW_HEIGHT) {
+        foreach(x; 0 .. WINDOW_WIDTH) {
+            if(uniform(0, LIFE_DENOMINATOR) == 0) {
+                world.addLife(x, y);
+            }
+        }
+    }
+
     // メインループ
     for(bool quit = false; !quit;) {
         // フレーム開始時刻
@@ -64,13 +83,20 @@ void main(string[] args) {
             }
         }
 
+        // 時刻を進める
+        world.next();
+
         // 画面クリア
         enforceSDL(SDL_SetRenderDrawColor(renderer, Uint8.max, Uint8.max, Uint8.max, Uint8.max));
         SDL_RenderClear(renderer);
 
-        // 描画処理
+        // 描画色を設定
         enforceSDL(SDL_SetRenderDrawColor(renderer, 0, 0, 0, Uint8.max));
-        enforceSDL(SDL_RenderDrawPoint(renderer, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
+
+        // 全ライフの描画
+        foreach(x, y; world) {
+            enforceSDL(SDL_RenderDrawPoint(renderer, cast(int) x, cast(int) y));
+        }
 
         // 描画結果表示
         SDL_RenderPresent(renderer);
