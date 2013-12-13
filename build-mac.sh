@@ -3,7 +3,7 @@
 ROOT=.
 DMD=dmd
 SD=${ROOT}/src
-SRCS="${SD}/dlife/main.d ${SD}/sdl/bindings.d ${SD}/sdl/utils.d"
+SRCS="${SD}/dlife/main.d ${SD}/dlife/life.d ${SD}/sdl/bindings.d ${SD}/sdl/utils.d"
 OD=${ROOT}/obj
 OF=${ROOT}/life
 INC=${SD}
