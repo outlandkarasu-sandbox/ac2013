@@ -1,5 +1,7 @@
 module dlife.life;
 
+import std.typetuple;
+
 /**
  *  ライフゲームの世界を表すクラス
  *  端が繋がったトーラス状の世界をシミュレートする。
@@ -169,9 +171,10 @@ private:
 
         // 前後左右のセルのライフを数える
         size_t count = 0;
-        foreach(row; [t, y, b]) {
-            foreach(col; [l, x, r]) {
-                if(isAlive(col, row)) {
+        foreach(row; TypeTuple!(t, y, b)) {
+            auto rowBits = world_[row];
+            foreach(col; TypeTuple!(l, x, r)) {
+                if(rowBits[col]) {
                     ++count;
                 }
             }

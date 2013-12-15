@@ -47,18 +47,27 @@ enum {
     SDL_RENDERER_TARGETTEXTURE = 0x00000008
 }
 
+alias int SDL_BlendMode;
+enum : SDL_BlendMode {
+    SDL_BLENDMODE_NONE = 0x00000000,
+    SDL_BLENDMODE_BLEND = 0x00000001,
+    SDL_BLENDMODE_ADD = 0x00000002,
+    SDL_BLENDMODE_MOD = 0x00000004
+}
+
 enum SDL_ALPHA_OPAQUE = 255;
 
 struct SDL_Renderer;
 
 SDL_Renderer* SDL_CreateRenderer(SDL_Window* window, int index, Uint32 flags);
-
+int SDL_SetRenderDrawBlendMode(SDL_Renderer* renderer, SDL_BlendMode blendMode);
 void SDL_RenderPresent(SDL_Renderer* renderer);
 void SDL_DestroyRenderer(SDL_Renderer* renderer);
 int SDL_SetRenderDrawColor(SDL_Renderer* renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 int SDL_RenderClear(SDL_Renderer* renderer);
 int SDL_RenderDrawPoint(SDL_Renderer* renderer, int x, int y);
 int SDL_RenderDrawPoints(SDL_Renderer* renderer, const(SDL_Point)* points, int count);
+int SDL_RenderFillRect(SDL_Renderer* renderer, const(SDL_Rect)* rect);
 
 enum {
     SDL_WINDOW_FULLSCREEN = 0x00000001,

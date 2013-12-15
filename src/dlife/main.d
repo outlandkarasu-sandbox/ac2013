@@ -12,10 +12,10 @@ import std.string;
 import dlife.life;
 
 /// ウィンドウの幅
-enum WINDOW_WIDTH = 320;
+enum WINDOW_WIDTH = 640;
 
 /// ウィンドウの高さ
-enum WINDOW_HEIGHT = 240;
+enum WINDOW_HEIGHT = 480;
 
 /// 秒間フレーム数(希望)
 enum FPS = 60;
@@ -29,6 +29,13 @@ enum LIFE_DENOMINATOR = 2;
 
 /// 点描画用バッファサイズ
 enum POINT_BUFFER_SIZE = 100000;
+
+/// フレームクリア時のアルファ
+/// 数字が小さいほど残像が長く残る
+enum ALPHA_ON_CLEAR = 8; //SDL_ALPHA_OPAQUE;
+
+/// 画面全体を指す矩形
+immutable SCREEN_RECT = SDL_Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 /**
  *  メイン関数
@@ -87,10 +94,13 @@ void main(string[] args) {
         world.next();
 
         // 画面クリア
-        enforceSDL(SDL_SetRenderDrawColor(renderer, Uint8.max, Uint8.max, Uint8.max, Uint8.max));
-        SDL_RenderClear(renderer);
+        enforceSDL(SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND));
+        enforceSDL(SDL_SetRenderDrawColor(renderer, Uint8.max, Uint8.max, Uint8.max, ALPHA_ON_CLEAR));
+        enforceSDL(SDL_RenderFillRect(renderer, &SCREEN_RECT));
+
 
         // 描画色を設定
+        enforceSDL(SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE));
         enforceSDL(SDL_SetRenderDrawColor(renderer, 0, 0, 0, Uint8.max));
 
         // 全ライフの描画
