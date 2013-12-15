@@ -1,6 +1,7 @@
 module dlife.life;
 
 import std.typetuple;
+import std.parallelism;
 
 /**
  *  ライフゲームの世界を表すクラス
@@ -103,11 +104,11 @@ class World {
     /**
      *  世界を次の時刻に進める
      */
-    void next() @safe {
+    void next() {
         auto nextWorld = (world_ is world1_) ? world2_ : world1_;
 
         // 全セルの生存チェック。結果を新しい世界に設定
-        foreach(y, row; world_) {
+        foreach(y, row; parallel(world_)) {
             foreach(x, life; row) {
                 nextWorld[y][x] = isAliveNext(x, y, life);
             }

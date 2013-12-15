@@ -12,10 +12,10 @@ import std.string;
 import dlife.life;
 
 /// ウィンドウの幅
-enum WINDOW_WIDTH = 640;
+enum WINDOW_WIDTH = 1280;
 
 /// ウィンドウの高さ
-enum WINDOW_HEIGHT = 480;
+enum WINDOW_HEIGHT = 960;
 
 /// 秒間フレーム数(希望)
 enum FPS = 60;
